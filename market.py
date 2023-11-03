@@ -11,6 +11,16 @@ logger = logging.getLogger(__file__)
 
 
 def get_product_list(page, campaign_id, access_token):
+    """
+    Получает список товаров из кампании на Яндекс Маркете.
+
+    page (str): страница результатов.
+    campaign_id(str): ID кампании.
+    access_token(str): Токен доступа.
+
+    return(list): Список товаров в формате JSON.
+    """
+
     endpoint_url = "https://api.partner.market.yandex.ru/"
     headers = {
         "Content-Type": "application/json",
@@ -30,6 +40,17 @@ def get_product_list(page, campaign_id, access_token):
 
 
 def update_stocks(stocks, campaign_id, access_token):
+    """
+    Обновляет информацию о наличии товаров в кампании на Яндекс Маркете.
+
+    stocks(list): остатки с Casio.
+    campaign_id(str): ID кампании.
+    access_token(str): Токен доступа к API.
+
+    Возвращает:
+        dict: слвоварь с информацией о товарах
+    """
+
     endpoint_url = "https://api.partner.market.yandex.ru/"
     headers = {
         "Content-Type": "application/json",
@@ -46,6 +67,15 @@ def update_stocks(stocks, campaign_id, access_token):
 
 
 def update_price(prices, campaign_id, access_token):
+    """
+    Обновляет цены на товары в кампании на Яндекс.Маркете.
+
+    :param prices: Информация о ценах с casio.
+    :param campaign_id: ID кампании
+    :param access_token: токен доступа API
+
+    :return: (dict) Обновленную информацию в json.
+    """
     endpoint_url = "https://api.partner.market.yandex.ru/"
     headers = {
         "Content-Type": "application/json",
@@ -62,7 +92,14 @@ def update_price(prices, campaign_id, access_token):
 
 
 def get_offer_ids(campaign_id, market_token):
-    """Получить артикулы товаров Яндекс маркета"""
+    """
+    Получить артикулы товаров Яндекс маркета
+
+    :param campaign_id:(str) ID кампании
+    :param market_token:(str) API токен Yandex Market
+
+    :return:(list) список артикулов товаров
+    """
     page = ""
     product_list = []
     while True:
@@ -78,6 +115,15 @@ def get_offer_ids(campaign_id, market_token):
 
 
 def create_stocks(watch_remnants, offer_ids, warehouse_id):
+    """
+    Собирает информацию о наличии товаров для обновления на Яндекc Маркете.
+
+    :param watch_remnants:(list) список с остастками с Casio
+    :param offer_ids:(list) артикулы Яндекс
+    :param warehouse_id: ID склада Яндекс Маркет
+
+    :return: список с инфомрацией для загрузки
+    """
     # Уберем то, что не загружено в market
     stocks = list()
     date = str(datetime.datetime.utcnow().replace(microsecond=0).isoformat() + "Z")
@@ -123,6 +169,14 @@ def create_stocks(watch_remnants, offer_ids, warehouse_id):
 
 
 def create_prices(watch_remnants, offer_ids):
+    """
+    Собирает информацию о ценах товаров для обновления на Яндекc Маркете.
+
+    :param watch_remnants:(list) список с остастками с Casio
+    :param offer_ids:(list) артикулы Яндекс
+
+    :return:(list) список с ценами для загрузки
+    """
     prices = []
     for watch in watch_remnants:
         if str(watch.get("Код")) in offer_ids:
@@ -143,6 +197,15 @@ def create_prices(watch_remnants, offer_ids):
 
 
 async def upload_prices(watch_remnants, campaign_id, market_token):
+    """
+    Загружает цены на товары на Яндекс Маркет.
+
+    :param watch_remnants:(list) Информация о ценах на товары.
+    :param campaign_id:(str) ID на Яндекс Маркете.
+    :param market_token:(str) Токен API Яндекс Маркета
+
+    :return:(list) Список цен на товары, загруженных на Яндекс.Маркет
+    """
     offer_ids = get_offer_ids(campaign_id, market_token)
     prices = create_prices(watch_remnants, offer_ids)
     for some_prices in list(divide(prices, 500)):
@@ -151,6 +214,16 @@ async def upload_prices(watch_remnants, campaign_id, market_token):
 
 
 async def upload_stocks(watch_remnants, campaign_id, market_token, warehouse_id):
+    """
+    Загружает информацию о наличии товаров на Яндекс.Маркет
+
+    :param watch_remnants:(list) Информация о наличии товаров
+    :param campaign_id:(str) ID кампании
+    :param market_token:(str) Токен доступа API Яндекс Маркета
+    :param warehouse_id:(str) ID склада на Яндекс Маркете
+
+    :return:(list) Список товаров, загруженных на Яндекс.Маркет.
+    """
     offer_ids = get_offer_ids(campaign_id, market_token)
     stocks = create_stocks(watch_remnants, offer_ids, warehouse_id)
     for some_stock in list(divide(stocks, 2000)):
