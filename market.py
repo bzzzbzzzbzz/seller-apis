@@ -18,7 +18,7 @@ def get_product_list(page, campaign_id, access_token):
     campaign_id(str): ID кампании.
     access_token(str): Токен доступа.
 
-    return(list): Список товаров в формате JSON.
+    return(list): Список товаров.
     """
 
     endpoint_url = "https://api.partner.market.yandex.ru/"
