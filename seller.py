@@ -21,7 +21,7 @@ def get_product_list(last_id, client_id, seller_token):
             seller_token(str): API-токен озон
 
         Возвращает:
-            obj: товары по ключу 'result'
+            dict: список товаров и их количество
     """
     url = "https://api-seller.ozon.ru/v2/product/list"
     headers = {
